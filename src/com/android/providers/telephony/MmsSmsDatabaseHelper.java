@@ -189,7 +189,7 @@ public class MmsSmsDatabaseHelper extends SQLiteOpenHelper {
     private static final String NO_SUCH_TABLE_EXCEPTION_MESSAGE = "no such table";
 
     static final String DATABASE_NAME = "mmssms.db";
-    static final int DATABASE_VERSION = 67;
+    static final int DATABASE_VERSION = 68;
     private final Context mContext;
     private LowStorageMonitor mLowStorageMonitor;
 
@@ -929,7 +929,10 @@ public class MmsSmsDatabaseHelper extends SQLiteOpenHelper {
                    "sub_id INTEGER DEFAULT " + SubscriptionManager.INVALID_SUBSCRIPTION_ID + ", " +
                    "pdu TEXT," + // the raw PDU for this part
                    "deleted INTEGER DEFAULT 0," + // bool to indicate if row is deleted
-                   "message_body TEXT);"); // message body
+                   "message_body TEXT," + // message body
+                   "display_originating_addr TEXT);"
+                   // email address if from an email gateway, otherwise same as address
+        );
 
         db.execSQL("CREATE TABLE attachments (" +
                    "sms_id INTEGER," +
@@ -1891,6 +1894,10 @@ public class MmsSmsDatabaseHelper extends SQLiteOpenHelper {
                         + Threads.NOTIFICATION + " INTEGER DEFAULT 0");
             }
         }
+    }
+
+    private void upgradeDatabaseToVersion65(SQLiteDatabase db) {
+        db.execSQL("ALTER TABLE " + SmsProvider.TABLE_RAW + " ADD COLUMN display_originating_addr TEXT");
     }
 
     @Override
